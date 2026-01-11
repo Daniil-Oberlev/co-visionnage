@@ -1,5 +1,5 @@
 import { SquarePen, X } from 'lucide-react';
-import useSound from 'use-sound'; // 1. Импортируем хук
+import useSound from 'use-sound';
 
 import { SeriesCard } from '@/entities/series';
 import { EditSeriesDialog, MarkWatchedDialog } from '@/features';
@@ -21,7 +21,7 @@ export const ToWatchCard = ({
   onMarkWatched,
   series,
 }: ToWatchCardProperties) => {
-  const [playClick] = useSound('/sounds/click.mp3', { volume: 0.5 });
+  const [playClick] = useSound('/sounds/click.mp3', { volume: 0.1 });
 
   return (
     <SeriesCard

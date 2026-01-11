@@ -22,8 +22,8 @@ const SeriesTracker = () => {
   const [genreFilter, setGenreFilter] = useState('all');
   const [yearFilter, setYearFilter] = useState('all');
   const [ratingFilter, setRatingFilter] = useState('all');
-  const [playClick] = useSound('/sounds/click.mp3', { volume: 0.5 });
-  const [playSuccess] = useSound('/sounds/success.mp3', { volume: 0.6 });
+  const [playClick] = useSound('/sounds/click.mp3', { volume: 0.1 });
+  const [playSuccess] = useSound('/sounds/success.mp3', { volume: 0.1 });
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   const allGenres = useMemo(() => {

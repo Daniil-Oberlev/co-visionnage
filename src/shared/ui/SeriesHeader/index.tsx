@@ -1,5 +1,5 @@
 import { Github, Mail } from 'lucide-react';
-import useSound from 'use-sound'; // 1. Импортируем хук
+import useSound from 'use-sound';
 
 import {
   Button,
@@ -17,8 +17,7 @@ interface HeaderProperties {
 }
 
 export const SeriesHeader = ({ user, onLogin, onLogout }: HeaderProperties) => {
-  // 2. Инициализируем звук клика
-  const [playClick] = useSound('/sounds/click.mp3', { volume: 0.5 });
+  const [playClick] = useSound('/sounds/click.mp3', { volume: 0.1 });
 
   return (
     <header className='mb-8 flex flex-col items-center justify-between gap-6 md:flex-row md:items-start'>
@@ -38,7 +37,7 @@ export const SeriesHeader = ({ user, onLogin, onLogout }: HeaderProperties) => {
             <Button
               className='w-full border-2 border-black bg-red-500 font-black text-white'
               onClick={() => {
-                playClick(); // Звук при выходе
+                playClick();
                 onLogout();
               }}
             >
@@ -50,7 +49,7 @@ export const SeriesHeader = ({ user, onLogin, onLogout }: HeaderProperties) => {
             <DialogTrigger asChild>
               <Button
                 className='rotate-1 border-4 border-black bg-yellow-400 px-6 py-3 font-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:rotate-0'
-                onClick={() => playClick()} // Звук при нажатии на "Вход"
+                onClick={() => playClick()}
               >
                 ВХОД
               </Button>
@@ -67,7 +66,7 @@ export const SeriesHeader = ({ user, onLogin, onLogout }: HeaderProperties) => {
                 <Button
                   className='border-2 border-black bg-white font-black text-black'
                   onClick={() => {
-                    playClick(); // Звук при выборе Google
+                    playClick();
                     onLogin('google');
                   }}
                 >
@@ -76,7 +75,7 @@ export const SeriesHeader = ({ user, onLogin, onLogout }: HeaderProperties) => {
                 <Button
                   className='flex gap-2 border-2 border-black bg-gray-800 font-black text-white'
                   onClick={() => {
-                    playClick(); // Звук при выборе Github
+                    playClick();
                     onLogin('github');
                   }}
                 >
