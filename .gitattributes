@@ -8,3 +8,5 @@
 *.jpeg binary
 *.ico binary
 *.svg text
+
+*.mp3 binary
