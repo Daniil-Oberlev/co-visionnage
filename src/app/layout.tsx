@@ -31,6 +31,7 @@ const RootLayout = ({
 }>) => {
   return (
     <html lang='ru'>
+      <link href='/manifest.json' rel='manifest' />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
