@@ -17,11 +17,16 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Наши Сериалы | Брутальный Трекер',
   description: 'Отслеживаем сериалы вместе',
+  manifest: '/manifest.json',
+  icons: {
+    apple: '/apple-icon.png',
+  },
   openGraph: {
     title: 'Наши Сериалы',
     description: 'Брутальный трекер для двоих',
     type: 'website',
   },
+  themeColor: '#3b82f6',
 };
 
 const RootLayout = ({
