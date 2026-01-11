@@ -27,8 +27,8 @@ export default async function Image() {
           padding: '40px 60px',
           transform: 'rotate(-2deg)',
           boxShadow: '20px 20px 0px 0px black',
-          display: 'flex' /* ОБЯЗАТЕЛЬНО */,
-          flexDirection: 'column' /* ОБЯЗАТЕЛЬНО */,
+          display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
         }}
       >
@@ -43,7 +43,7 @@ export default async function Image() {
             padding: '10px 20px',
             border: '4px solid black',
             marginTop: 20,
-            display: 'flex' /* ОБЯЗАТЕЛЬНО */,
+            display: 'flex',
           }}
         >
           <span
