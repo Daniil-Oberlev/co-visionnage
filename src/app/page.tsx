@@ -7,15 +7,8 @@ import { AddSeriesDialog } from '@/features/add-series';
 import { useDebounce } from '@/shared/hooks/useDebounce';
 import { MockSeries } from '@/shared/mock/series';
 import { Series, SeriesData } from '@/shared/types';
-import {
-  EmptyState,
-  SeriesFilters,
-  SeriesHeader,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/shared/ui';
+import { EmptyState, SeriesFilters, SeriesHeader } from '@/shared/ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/lib';
 import { ToWatchCard, WatchedCard } from '@/widgets';
 
 const SeriesTracker = () => {

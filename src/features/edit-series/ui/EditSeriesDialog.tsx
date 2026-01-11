@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
   Textarea,
-} from '@/shared/ui';
+} from '@/shared/ui/lib';
 
 interface EditSeriesProperties {
   includeRating?: boolean;

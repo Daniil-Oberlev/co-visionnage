@@ -1,4 +1,4 @@
-import { Label } from '../Label';
+import { Label } from '../lib/Label';
 
 export const FilterBox = ({
   label,

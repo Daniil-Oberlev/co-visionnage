@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/shared/ui';
+} from '@/shared/ui/lib';
 import { CARD_COLORS, CARD_ROTATIONS, HEADER_COLORS } from '../model/constants';
 
 interface SeriesCardProperties {

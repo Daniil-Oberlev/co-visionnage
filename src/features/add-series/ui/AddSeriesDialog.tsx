@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
   Textarea,
-} from '@/shared/ui';
+} from '@/shared/ui/lib';
 
 interface AddSeriesDialogProperties {
   onAdd: (series: Series) => void;

@@ -3,7 +3,7 @@ import { SquarePen, X } from 'lucide-react';
 import { SeriesCard } from '@/entities/series';
 import { EditSeriesDialog, MarkWatchedDialog } from '@/features';
 import { Series, SeriesData } from '@/shared/types';
-import { Badge, Button } from '@/shared/ui';
+import { Badge, Button } from '@/shared/ui/lib';
 
 interface ToWatchCardProperties {
   index: number;

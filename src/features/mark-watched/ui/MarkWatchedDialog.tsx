@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
   Textarea,
-} from '@/shared/ui';
+} from '@/shared/ui/lib';
 
 interface MarkWatchedProperties {
   onMark: (id: number, rating: number, comment: string) => void;

@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/shared/ui';
+} from '@/shared/ui/lib';
 
 interface HeaderProperties {
   user?: { name: string };

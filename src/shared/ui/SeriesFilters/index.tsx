@@ -5,7 +5,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/shared/ui';
+} from '@/shared/ui/lib';
 import { FilterBox } from '../FilterBox';
 
 interface FiltersProperties {
