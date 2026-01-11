@@ -2,6 +2,7 @@
 
 import { Check, Clock } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import useSound from 'use-sound';
 
 import { AddSeriesDialog } from '@/features/add-series';
 import { useDebounce } from '@/shared/hooks/useDebounce';
@@ -21,7 +22,8 @@ const SeriesTracker = () => {
   const [genreFilter, setGenreFilter] = useState('all');
   const [yearFilter, setYearFilter] = useState('all');
   const [ratingFilter, setRatingFilter] = useState('all');
-
+  const [playClick] = useSound('/sounds/click.mp3', { volume: 0.5 });
+  const [playSuccess] = useSound('/sounds/success.mp3', { volume: 0.6 });
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   const allGenres = useMemo(() => {
@@ -63,19 +65,27 @@ const SeriesTracker = () => {
     [filteredSeries],
   );
 
-  const handleAddSeries = useCallback((newShow: Series) => {
-    setSeries((previous) => [...previous, newShow]);
-  }, []);
+  const handleAddSeries = useCallback(
+    (newShow: Series) => {
+      setSeries((previous) => [...previous, newShow]);
+      playSuccess();
+    },
+    [playSuccess],
+  );
 
   const deleteSeries = useCallback((id: number) => {
     setSeries((previous) => previous.filter((s) => s.id !== id));
   }, []);
 
-  const editSeries = useCallback((id: number, data: Partial<SeriesData>) => {
-    setSeries((previous) =>
-      previous.map((s) => (s.id === id ? { ...s, ...data } : s)),
-    );
-  }, []);
+  const editSeries = useCallback(
+    (id: number, data: Partial<SeriesData>) => {
+      setSeries((previous) =>
+        previous.map((s) => (s.id === id ? { ...s, ...data } : s)),
+      );
+      playSuccess();
+    },
+    [playSuccess],
+  );
 
   const markAsWatched = useCallback(
     (id: number, rating: number, comment: string) => {
@@ -92,8 +102,9 @@ const SeriesTracker = () => {
             : s,
         ),
       );
+      playSuccess();
     },
-    [],
+    [playSuccess],
   );
 
   const moveToWatchList = useCallback((id: number) => {
@@ -138,17 +149,30 @@ const SeriesTracker = () => {
           ratingFilter={ratingFilter}
           searchTerm={searchTerm}
           yearFilter={yearFilter}
-          onGenreChange={setGenreFilter}
-          onRatingChange={setRatingFilter}
+          onGenreChange={(v) => {
+            playClick();
+            setGenreFilter(v);
+          }}
+          onRatingChange={(v) => {
+            playClick();
+            setRatingFilter(v);
+          }}
           onSearchChange={setSearchTerm}
-          onYearChange={setYearFilter}
+          onYearChange={(v) => {
+            playClick();
+            setYearFilter(v);
+          }}
         />
 
         <div className='mb-8 flex justify-center'>
           <AddSeriesDialog onAdd={handleAddSeries} />
         </div>
 
-        <Tabs className='w-full' defaultValue='to-watch'>
+        <Tabs
+          className='w-full'
+          defaultValue='to-watch'
+          onValueChange={() => playClick()}
+        >
           <TabsList className='mb-8 grid h-auto w-full grid-cols-2 border-4 border-black bg-yellow-400 p-2'>
             <TabsTrigger
               className='border-2 border-transparent p-4 font-black transition-all data-[state=active]:rotate-1 data-[state=active]:border-black data-[state=active]:bg-orange-500'

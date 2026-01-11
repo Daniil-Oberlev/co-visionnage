@@ -1,4 +1,5 @@
 import { SquarePen, X } from 'lucide-react';
+import useSound from 'use-sound'; // 1. Импортируем хук
 
 import { SeriesCard } from '@/entities/series';
 import { EditSeriesDialog, MarkWatchedDialog } from '@/features';
@@ -20,6 +21,8 @@ export const ToWatchCard = ({
   onMarkWatched,
   series,
 }: ToWatchCardProperties) => {
+  const [playClick] = useSound('/sounds/click.mp3', { volume: 0.5 });
+
   return (
     <SeriesCard
       actions={
@@ -31,6 +34,7 @@ export const ToWatchCard = ({
                 className='h-8 w-8 rounded-none border-2 border-black bg-yellow-400 p-0 text-black hover:bg-yellow-500'
                 size='sm'
                 variant='ghost'
+                onClick={() => playClick()}
               >
                 <SquarePen className='h-4 w-4' />
               </Button>
@@ -41,13 +45,20 @@ export const ToWatchCard = ({
             className='h-8 w-8 rounded-none border-2 border-black bg-red-500 p-0 text-white hover:bg-red-600'
             size='sm'
             variant='ghost'
-            onClick={() => onDelete(series.id)}
+            onClick={() => {
+              playClick();
+              onDelete(series.id);
+            }}
           >
             <X className='h-4 w-4' />
           </Button>
         </>
       }
-      footer={<MarkWatchedDialog series={series} onMark={onMarkWatched} />}
+      footer={
+        <div onClick={() => playClick()}>
+          <MarkWatchedDialog series={series} onMark={onMarkWatched} />
+        </div>
+      }
       index={index}
       series={series}
       variant='to-watch'
