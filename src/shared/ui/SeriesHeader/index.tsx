@@ -44,7 +44,7 @@ export const SeriesHeader = ({ user, onLogin, onLogout }: HeaderProperties) => (
               ВХОД
             </Button>
           </DialogTrigger>
-          <DialogContent className='max-w-sm border-4 border-black bg-pink-400'>
+          <DialogContent className='max-w-sm border-4 border-black bg-pink-400 [&>button]:-top-3 [&>button]:-right-3 [&>button]:rounded-none [&>button]:border-2 [&>button]:border-black [&>button]:bg-white [&>button]:opacity-100 [&>button]:hover:bg-red-500'>
             <DialogHeader>
               <div className='mb-4 -rotate-1 border-2 border-black bg-purple-600 p-2 text-yellow-300'>
                 <DialogTitle className='font-black'>ВХОД В СИСТЕМУ</DialogTitle>

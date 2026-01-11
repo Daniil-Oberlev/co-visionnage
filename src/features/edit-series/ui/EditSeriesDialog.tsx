@@ -65,7 +65,7 @@ export const EditSeriesDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className='max-h-[90vh] max-w-md overflow-y-auto border-4 border-black bg-cyan-400'>
+      <DialogContent className='max-h-[90vh] max-w-md border-4 border-black bg-cyan-400 [&>button]:-top-3 [&>button]:-right-3 [&>button]:rounded-none [&>button]:border-2 [&>button]:border-black [&>button]:bg-white [&>button]:opacity-100 [&>button]:hover:bg-red-500'>
         <DialogHeader>
           <div className='mb-4 -rotate-1 transform border-2 border-black bg-purple-600 p-2 text-yellow-300'>
             <DialogTitle className='brutal-font text-xl font-black'>

@@ -45,7 +45,7 @@ export const MarkWatchedDialog = ({
           <Check className='mr-2 h-4 w-4' /> ПРОСМОТРЕЛИ!
         </Button>
       </DialogTrigger>
-      <DialogContent className='border-4 border-black bg-orange-400'>
+      <DialogContent>
         <DialogHeader>
           <div className='mb-4 rotate-1 border-2 border-black bg-purple-600 p-2 text-yellow-300'>
             <DialogTitle className='brutal-font font-black uppercase'>
