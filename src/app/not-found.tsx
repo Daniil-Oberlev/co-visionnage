@@ -50,7 +50,7 @@ const NotFound = () => {
 
           <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
             <button
-              className='flex items-center justify-center gap-2 border-4 border-black bg-white p-4 font-black uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors hover:bg-black hover:text-white active:translate-x-[2px] active:translate-y-[2px] active:shadow-none'
+              className='flex items-center justify-center gap-2 border-4 border-black bg-white p-4 font-black uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors hover:bg-black hover:text-white active:translate-x-0.5 active:translate-y-0.5 active:shadow-none'
               onClick={() => {
                 playClick();
                 router.back();
@@ -60,7 +60,7 @@ const NotFound = () => {
             </button>
 
             <Link
-              className='flex items-center justify-center gap-2 border-4 border-black bg-lime-500 p-4 font-black uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors hover:bg-black hover:text-white active:translate-x-[2px] active:translate-y-[2px] active:shadow-none'
+              className='flex items-center justify-center gap-2 border-4 border-black bg-lime-500 p-4 font-black uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors hover:bg-black hover:text-white active:translate-x-0.5 active:translate-y-0.5 active:shadow-none'
               href='/'
               onClick={() => playClick()}
             >
