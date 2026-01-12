@@ -1,8 +1,8 @@
 import { Plus } from 'lucide-react';
 import { ChangeEvent, useState } from 'react';
-import useSound from 'use-sound';
 
-import { Series } from '@/shared/types';
+import { useAppSounds } from '@/shared/hooks/useAppSounds';
+import { Series, SeriesStatus } from '@/shared/types';
 import {
   Button,
   Dialog,
@@ -29,12 +29,12 @@ interface AddSeriesDialogProperties {
 export const AddSeriesDialog = ({ onAdd }: AddSeriesDialogProperties) => {
   const [isOpen, setIsOpen] = useState(false);
   const [genreInput, setGenreInput] = useState('');
-  const [playClick] = useSound('/sounds/click.mp3', { volume: 0.1 });
+  const { playClick } = useAppSounds();
   const [newSeries, setNewSeries] = useState({
     comment: '',
     image: '',
     rating: 5,
-    status: 'to-watch' as 'watched' | 'to-watch',
+    status: 'to-watch' as SeriesStatus,
     title: '',
     year: new Date().getFullYear(),
   });
@@ -151,7 +151,7 @@ export const AddSeriesDialog = ({ onAdd }: AddSeriesDialogProperties) => {
             <Label className='brutal-font font-bold text-black'>СТАТУС</Label>
             <Select
               value={newSeries.status}
-              onValueChange={(value: 'watched' | 'to-watch') =>
+              onValueChange={(value: SeriesStatus) =>
                 setNewSeries({ ...newSeries, status: value })
               }
             >

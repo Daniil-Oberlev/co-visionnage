@@ -2,9 +2,9 @@
 
 import { Check, Clock } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
-import useSound from 'use-sound';
 
 import { AddSeriesDialog } from '@/features/add-series';
+import { useAppSounds } from '@/shared/hooks/useAppSounds';
 import { useDebounce } from '@/shared/hooks/useDebounce';
 import { MockSeries } from '@/shared/mock/series';
 import { Series, SeriesData } from '@/shared/types';
@@ -18,12 +18,12 @@ const SeriesTracker = () => {
     { name: string; provider: string } | undefined
   >();
 
+  const { playClick, playSuccess } = useAppSounds();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [genreFilter, setGenreFilter] = useState('all');
   const [yearFilter, setYearFilter] = useState('all');
   const [ratingFilter, setRatingFilter] = useState('all');
-  const [playClick] = useSound('/sounds/click.mp3', { volume: 0.1 });
-  const [playSuccess] = useSound('/sounds/success.mp3', { volume: 0.1 });
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   const allGenres = useMemo(() => {
