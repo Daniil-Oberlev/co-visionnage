@@ -52,5 +52,17 @@ export default async function HomePage() {
     );
   }
 
-  return <ClientTrackerWrapper family={familyData} userEmail={user.email} />;
+  const { data: initialSeries } = await supabase
+    .from('family_series')
+    .select('*')
+    .eq('family_id', familyData.id)
+    .order('created_at', { ascending: false });
+
+  return (
+    <ClientTrackerWrapper
+      family={familyData}
+      initialSeries={initialSeries ?? []}
+      userEmail={user.email}
+    />
+  );
 }

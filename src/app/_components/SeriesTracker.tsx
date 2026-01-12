@@ -1,12 +1,20 @@
 'use client';
 
 import { Check, Clock } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { AddSeriesDialog } from '@/features/add-series';
+import {
+  addSeries as addSeriesAction,
+  deleteSeries as deleteAction,
+  editSeries as editAction,
+  updateSeriesStatus,
+} from '@/shared/actions/series';
+import { createClient } from '@/shared/api/supabase/client';
 import { useAppSounds } from '@/shared/hooks/useAppSounds';
 import { useDebounce } from '@/shared/hooks/useDebounce';
-import { useSeries } from '@/shared/hooks/useSeries';
+import { Series, SeriesData } from '@/shared/types';
 import {
   EmptyState,
   SeriesCardSkeleton,
@@ -23,20 +31,42 @@ interface SeriesTrackerProperties {
     name: string;
     invite_code: string;
   };
+  initialSeries: Series[];
 }
 
-const SeriesTracker = ({ userEmail, family }: SeriesTrackerProperties) => {
-  const {
-    series,
-    addSeries,
-    deleteSeries,
-    editSeries,
-    markAsWatched,
-    moveToWatchList,
-  } = useSeries();
-
+const SeriesTracker = ({
+  userEmail,
+  family,
+  initialSeries,
+}: SeriesTrackerProperties) => {
+  const router = useRouter();
+  const supabase = createClient();
   const { playClick } = useAppSounds();
   const [isLoading, setIsLoading] = useState(true);
+
+  const series = initialSeries;
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`family-series-${family.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'family_series',
+          filter: `family_id=eq.${family.id}`,
+        },
+        () => {
+          router.refresh();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [family.id, supabase, router]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 800);
@@ -55,7 +85,10 @@ const SeriesTracker = ({ userEmail, family }: SeriesTrackerProperties) => {
   }, [series]);
 
   const allYears = useMemo(
-    () => [...new Set(series.map((s) => s.year))].toSorted((a, b) => b - a),
+    () =>
+      [...new Set(series.map((s) => s.year))]
+        .filter(Boolean)
+        .toSorted((a, b) => b - a),
     [series],
   );
 
@@ -65,9 +98,11 @@ const SeriesTracker = ({ userEmail, family }: SeriesTrackerProperties) => {
         .toLowerCase()
         .includes(debouncedSearch.toLowerCase());
       const matchesGenre =
-        genreFilter === 'all' || show.genres.includes(genreFilter);
+        genreFilter === 'all' ||
+        (show.genres && show.genres.includes(genreFilter));
       const matchesYear =
-        yearFilter === 'all' || show.year.toString() === yearFilter;
+        yearFilter === 'all' ||
+        (show.year && show.year.toString() === yearFilter);
 
       let matchesRating = true;
       if (ratingFilter !== 'all' && show.rating) {
@@ -81,9 +116,7 @@ const SeriesTracker = ({ userEmail, family }: SeriesTrackerProperties) => {
             break;
           }
           case '3+': {
-            {
-              matchesRating = show.rating >= 3;
-            }
+            matchesRating = show.rating >= 3;
             break;
           }
         }
@@ -102,6 +135,32 @@ const SeriesTracker = ({ userEmail, family }: SeriesTrackerProperties) => {
   const watchedList = useMemo(
     () => filteredSeries.filter((s) => s.status === 'watched'),
     [filteredSeries],
+  );
+
+  const handleAddSeries = useCallback(
+    async (data: SeriesData) => {
+      await addSeriesAction(family.id, data.title);
+    },
+    [family.id],
+  );
+
+  const handleDelete = useCallback(async (id: number) => {
+    await deleteAction(id);
+  }, []);
+
+  const handleMarkWatched = useCallback(async (id: number) => {
+    await updateSeriesStatus(id, 'watched');
+  }, []);
+
+  const handleMoveToWatch = useCallback(async (id: number) => {
+    await updateSeriesStatus(id, 'to-watch');
+  }, []);
+
+  const handleEdit = useCallback(
+    async (id: number, updates: Partial<Series>) => {
+      await editAction(id, updates);
+    },
+    [],
   );
 
   return (
@@ -145,7 +204,7 @@ const SeriesTracker = ({ userEmail, family }: SeriesTrackerProperties) => {
         />
 
         <div className='mb-8 flex justify-center'>
-          <AddSeriesDialog onAdd={addSeries} />
+          <AddSeriesDialog onAdd={handleAddSeries} />
         </div>
 
         <Tabs
@@ -184,9 +243,9 @@ const SeriesTracker = ({ userEmail, family }: SeriesTrackerProperties) => {
                     key={show.id}
                     index={index}
                     series={show}
-                    onDelete={deleteSeries}
-                    onEdit={editSeries}
-                    onMarkWatched={markAsWatched}
+                    onDelete={() => handleDelete(show.id)}
+                    onEdit={handleEdit}
+                    onMarkWatched={() => handleMarkWatched(show.id)}
                   />
                 ))}
               </div>
@@ -209,9 +268,9 @@ const SeriesTracker = ({ userEmail, family }: SeriesTrackerProperties) => {
                     key={show.id}
                     index={index}
                     series={show}
-                    onDelete={deleteSeries}
-                    onEdit={editSeries}
-                    onMoveToWatchList={moveToWatchList}
+                    onDelete={() => handleDelete(show.id)}
+                    onEdit={handleEdit}
+                    onMoveToWatchList={() => handleMoveToWatch(show.id)}
                   />
                 ))}
               </div>
