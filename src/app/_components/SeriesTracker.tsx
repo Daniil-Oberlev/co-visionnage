@@ -2,7 +2,6 @@
 
 import { Check, Clock } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 import { AddSeriesDialog } from '@/features/add-series';
 import {
@@ -40,15 +39,86 @@ const SeriesTracker = ({
   family,
   initialSeries,
 }: SeriesTrackerProperties) => {
-  const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const { playClick } = useAppSounds();
   const [isLoading, setIsLoading] = useState(true);
 
-  const series = initialSeries;
+  const [series, setSeries] = useState<Series[]>(initialSeries);
+
+  const loadSeries = useCallback(async () => {
+    console.warn('SeriesTracker: loadSeries start', {
+      familyId: family.id,
+    });
+    setIsLoading(true);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setSeries([]);
+      setIsLoading(false);
+      return;
+    }
+
+    const { data: familySeries, error: seriesError } = await supabase
+      .from('family_series')
+      .select('*')
+      .eq('family_id', family.id)
+      .order('created_at', { ascending: false });
+
+    if (seriesError) {
+      console.error('SeriesTracker: error loading family_series', seriesError);
+      setSeries([]);
+      setIsLoading(false);
+      return;
+    }
+
+    const seriesIds = (familySeries ?? [])
+      .map((s) => s?.id)
+      .filter((id): id is string => typeof id === 'string');
+
+    const { data: statuses, error: statusesError } =
+      seriesIds.length > 0
+        ? await supabase
+            .from('family_series_status')
+            .select('series_id, status, rating, comment')
+            .eq('user_id', user.id)
+            .in('series_id', seriesIds)
+        : { data: [], error: undefined };
+
+    if (statusesError) {
+      console.error(
+        'SeriesTracker: error loading family_series_status',
+        statusesError,
+      );
+    }
+
+    const statusBySeriesId = new Map(
+      (statuses ?? []).map((row) => [row.series_id, row]),
+    );
+
+    const merged = (familySeries ?? []).map((s) => {
+      const statusRow = statusBySeriesId.get(s.id);
+      return {
+        ...s,
+        status:
+          (statusRow?.status as Series['status'] | undefined) ?? 'to-watch',
+        rating: statusRow?.rating ?? undefined,
+        comment: statusRow?.comment ?? undefined,
+      } as Series;
+    });
+
+    setSeries(merged);
+    setIsLoading(false);
+  }, [family.id, supabase]);
 
   useEffect(() => {
-    const channel = supabase
+    const timer = setTimeout(() => {
+      void loadSeries();
+    }, 0);
+
+    const seriesChannel = supabase
       .channel(`family-series-${family.id}`)
       .on(
         'postgres_changes',
@@ -59,20 +129,32 @@ const SeriesTracker = ({
           filter: `family_id=eq.${family.id}`,
         },
         () => {
-          router.refresh();
+          void loadSeries();
+        },
+      )
+      .subscribe();
+
+    const statusChannel = supabase
+      .channel(`family-series-status-${family.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'family_series_status',
+        },
+        () => {
+          void loadSeries();
         },
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      clearTimeout(timer);
+      supabase.removeChannel(seriesChannel);
+      supabase.removeChannel(statusChannel);
     };
-  }, [family.id, supabase, router]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
+  }, [family.id, loadSeries, supabase]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [genreFilter, setGenreFilter] = useState('all');
@@ -150,14 +232,22 @@ const SeriesTracker = ({
         return result;
       }
 
-      router.refresh();
+      await loadSeries();
       return result;
     },
-    [router],
+    [loadSeries],
   );
 
   const handleAddSeries = useCallback(
     async (data: SeriesData) => {
+      console.warn('SeriesTracker: add series', {
+        familyId: family.id,
+        title: data.title,
+        status: data.status,
+        genresCount: data.genres.length,
+        hasImage:
+          typeof data.image_url === 'string' && data.image_url.length > 0,
+      });
       await runAndRefresh(() => addSeriesAction(family.id, data));
     },
     [family.id, runAndRefresh],
@@ -165,6 +255,7 @@ const SeriesTracker = ({
 
   const handleDelete = useCallback(
     async (id: string) => {
+      console.warn('SeriesTracker: delete series', { id });
       await runAndRefresh(() => deleteAction(id));
     },
     [runAndRefresh],
@@ -172,6 +263,11 @@ const SeriesTracker = ({
 
   const handleMarkWatched = useCallback(
     async (id: string, rating: number, comment: string) => {
+      console.warn('SeriesTracker: mark watched', {
+        id,
+        rating,
+        commentLength: comment.length,
+      });
       await runAndRefresh(() => markWatchedAction(id, rating, comment));
     },
     [runAndRefresh],
@@ -179,6 +275,7 @@ const SeriesTracker = ({
 
   const handleMoveToWatch = useCallback(
     async (id: string) => {
+      console.warn('SeriesTracker: move to watch list', { id });
       await runAndRefresh(() => moveToWatchListAction(id));
     },
     [runAndRefresh],
@@ -186,6 +283,10 @@ const SeriesTracker = ({
 
   const handleEdit = useCallback(
     async (id: string, updates: Partial<SeriesData>) => {
+      console.warn('SeriesTracker: edit series', {
+        id,
+        keys: Object.keys(updates),
+      });
       await runAndRefresh(() => editAction(id, updates));
     },
     [runAndRefresh],
