@@ -52,13 +52,12 @@ export default defineConfig([
     rules: {
       ...reactPlugin.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-
       ...eslintPluginUnicorn.configs.recommended.rules,
-
       'comma-dangle': ['warn', 'always-multiline'],
       'object-curly-spacing': ['warn', 'always'],
       'no-console': ['error', { allow: ['error', 'warn'] }],
       'no-unreachable': 'error',
+      'unicorn/no-nested-ternary': 'off',
       'unicorn/filename-case': 'off',
       'react/jsx-sort-props': [
         'warn',

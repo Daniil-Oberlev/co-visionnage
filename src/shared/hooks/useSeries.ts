@@ -10,6 +10,7 @@ export const useSeries = () => {
 
   const [series, setSeries] = useState<Series[]>(() => {
     if (globalThis.window === undefined) return MockSeries;
+
     const saved = localStorage.getItem('series-data');
     return saved ? JSON.parse(saved) : MockSeries;
   });

@@ -1,7 +1,7 @@
 'use client';
 
 import { Check, Clock } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { AddSeriesDialog } from '@/features/add-series';
 import { useAppSounds } from '@/shared/hooks/useAppSounds';
@@ -9,6 +9,7 @@ import { useDebounce } from '@/shared/hooks/useDebounce';
 import { useSeries } from '@/shared/hooks/useSeries';
 import { EmptyState, SeriesFilters, SeriesHeader } from '@/shared/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/lib';
+import { SeriesCardSkeleton } from '@/shared/ui/SeriesCardSkeleton';
 import { ToWatchCard, WatchedCard } from '@/widgets';
 
 const SeriesTracker = () => {
@@ -25,6 +26,18 @@ const SeriesTracker = () => {
     { name: string; provider: string } | undefined
   >();
   const { playClick } = useAppSounds();
+
+  const [isMounted, setIsMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsMounted(true);
+      setIsLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [genreFilter, setGenreFilter] = useState('all');
@@ -51,12 +64,26 @@ const SeriesTracker = () => {
         genreFilter === 'all' || show.genres.includes(genreFilter);
       const matchesYear =
         yearFilter === 'all' || show.year.toString() === yearFilter;
-      const matchesRating =
-        ratingFilter === 'all' ||
-        (show.rating &&
-          ((ratingFilter === '5' && show.rating === 5) ||
-            (ratingFilter === '4+' && show.rating >= 4) ||
-            (ratingFilter === '3+' && show.rating >= 3)));
+
+      let matchesRating = true;
+      if (ratingFilter !== 'all' && show.rating) {
+        switch (ratingFilter) {
+          case '5': {
+            matchesRating = show.rating === 5;
+            break;
+          }
+          case '4+': {
+            matchesRating = show.rating >= 4;
+            break;
+          }
+          case '3+': {
+            matchesRating = show.rating >= 3;
+            break;
+          }
+        }
+      } else if (ratingFilter !== 'all' && !show.rating) {
+        matchesRating = false;
+      }
 
       return matchesSearch && matchesGenre && matchesYear && matchesRating;
     });
@@ -70,6 +97,22 @@ const SeriesTracker = () => {
     () => filteredSeries.filter((s) => s.status === 'watched'),
     [filteredSeries],
   );
+
+  const renderGrid = (content: React.ReactNode) => (
+    <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+      {content}
+    </div>
+  );
+
+  const renderSkeletons = () => (
+    <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+      {Array.from({ length: 4 }).map((_, index) => (
+        <SeriesCardSkeleton key={index} />
+      ))}
+    </div>
+  );
+
+  if (!isMounted) return <div className='min-h-screen bg-blue-500' />;
 
   return (
     <div className='brutal-font relative min-h-screen overflow-hidden bg-blue-500 font-sans'>
@@ -121,7 +164,7 @@ const SeriesTracker = () => {
           defaultValue='to-watch'
           onValueChange={() => playClick()}
         >
-          <TabsList className='mb-8 grid h-auto w-full grid-cols-2 border-4 border-black bg-yellow-400 p-2'>
+          <TabsList className='mb-8 grid h-auto w-full grid-cols-2 border-4 border-black bg-yellow-400 p-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'>
             <TabsTrigger
               className='border-2 border-transparent p-4 font-black transition-all data-[state=active]:rotate-1 data-[state=active]:border-black data-[state=active]:bg-orange-500'
               value='to-watch'
@@ -137,8 +180,10 @@ const SeriesTracker = () => {
           </TabsList>
 
           <TabsContent className='outline-none' value='to-watch'>
-            <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-              {toWatchList.length > 0 ? (
+            {isLoading ? (
+              renderSkeletons()
+            ) : toWatchList.length > 0 ? (
+              renderGrid(
                 toWatchList.map((show, index) => (
                   <ToWatchCard
                     key={show.id}
@@ -148,16 +193,18 @@ const SeriesTracker = () => {
                     onEdit={editSeries}
                     onMarkWatched={markAsWatched}
                   />
-                ))
-              ) : (
-                <EmptyState />
-              )}
-            </div>
+                )),
+              )
+            ) : (
+              <EmptyState />
+            )}
           </TabsContent>
 
           <TabsContent className='outline-none' value='watched'>
-            <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-              {watchedList.length > 0 ? (
+            {isLoading ? (
+              renderSkeletons()
+            ) : watchedList.length > 0 ? (
+              renderGrid(
                 watchedList.map((show, index) => (
                   <WatchedCard
                     key={show.id}
@@ -167,11 +214,11 @@ const SeriesTracker = () => {
                     onEdit={editSeries}
                     onMoveToWatchList={moveToWatchList}
                   />
-                ))
-              ) : (
-                <EmptyState />
-              )}
-            </div>
+                )),
+              )
+            ) : (
+              <EmptyState />
+            )}
           </TabsContent>
         </Tabs>
       </div>
