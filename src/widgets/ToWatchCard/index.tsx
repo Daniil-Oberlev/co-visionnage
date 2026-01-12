@@ -1,8 +1,8 @@
-import { SquarePen, X } from 'lucide-react';
-import useSound from 'use-sound';
+import { SquarePen } from 'lucide-react';
 
 import { SeriesCard } from '@/entities/series';
 import { EditSeriesDialog, MarkWatchedDialog } from '@/features';
+import { useAppSounds } from '@/shared/hooks/useAppSounds';
 import { Series, SeriesData } from '@/shared/types';
 import { Badge, Button } from '@/shared/ui/lib';
 
@@ -21,38 +21,25 @@ export const ToWatchCard = ({
   onMarkWatched,
   series,
 }: ToWatchCardProperties) => {
-  const [playClick] = useSound('/sounds/click.mp3', { volume: 0.1 });
+  const { playClick } = useAppSounds();
 
   return (
     <SeriesCard
       actions={
-        <>
-          <EditSeriesDialog
-            series={series}
-            trigger={
-              <Button
-                className='h-8 w-8 rounded-none border-2 border-black bg-yellow-400 p-0 text-black hover:bg-yellow-500'
-                size='sm'
-                variant='ghost'
-                onClick={() => playClick()}
-              >
-                <SquarePen className='h-4 w-4' />
-              </Button>
-            }
-            onSave={onEdit}
-          />
-          <Button
-            className='h-8 w-8 rounded-none border-2 border-black bg-red-500 p-0 text-white hover:bg-red-600'
-            size='sm'
-            variant='ghost'
-            onClick={() => {
-              playClick();
-              onDelete(series.id);
-            }}
-          >
-            <X className='h-4 w-4' />
-          </Button>
-        </>
+        <EditSeriesDialog
+          series={series}
+          trigger={
+            <Button
+              className='h-8 w-8 rounded-none border-2 border-black bg-yellow-400 p-0 text-black hover:bg-yellow-500'
+              size='sm'
+              variant='ghost'
+              onClick={() => playClick()}
+            >
+              <SquarePen className='h-4 w-4' />
+            </Button>
+          }
+          onSave={onEdit}
+        />
       }
       footer={
         <div onClick={() => playClick()}>
@@ -62,6 +49,7 @@ export const ToWatchCard = ({
       index={index}
       series={series}
       variant='to-watch'
+      onDelete={() => onDelete(series.id)}
     >
       <div className='flex flex-wrap gap-2'>
         {series.genres.map((genre) => (

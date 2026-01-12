@@ -1,7 +1,8 @@
-import { RotateCcw, SquarePen, X } from 'lucide-react';
+import { RotateCcw, SquarePen } from 'lucide-react';
 
 import { SeriesCard } from '@/entities/series';
 import { EditSeriesDialog } from '@/features/edit-series';
+import { useAppSounds } from '@/shared/hooks/useAppSounds'; // Импортируем хук
 import { Series, SeriesData } from '@/shared/types';
 import { Badge, Button } from '@/shared/ui/lib';
 
@@ -20,38 +21,34 @@ export const WatchedCard = ({
   onMoveToWatchList,
   series,
 }: WatchedCardProperties) => {
+  const { playClick } = useAppSounds();
+
   return (
     <SeriesCard
       actions={
-        <>
-          <EditSeriesDialog
-            includeRating
-            series={series}
-            trigger={
-              <Button
-                className='h-8 w-8 rounded-none border-2 border-black bg-yellow-400 p-0 text-black hover:bg-yellow-500'
-                size='sm'
-                variant='ghost'
-              >
-                <SquarePen />
-              </Button>
-            }
-            onSave={onEdit}
-          />
-          <Button
-            className='h-8 w-8 rounded-none border-2 border-black bg-red-500 p-0 text-white hover:bg-red-600'
-            size='sm'
-            variant='ghost'
-            onClick={() => onDelete(series.id)}
-          >
-            <X className='h-4 w-4' />
-          </Button>
-        </>
+        <EditSeriesDialog
+          includeRating
+          series={series}
+          trigger={
+            <Button
+              className='h-8 w-8 rounded-none border-2 border-black bg-yellow-400 p-0 text-black hover:bg-yellow-500'
+              size='sm'
+              variant='ghost'
+              onClick={() => playClick()}
+            >
+              <SquarePen className='h-4 w-4' />
+            </Button>
+          }
+          onSave={onEdit}
+        />
       }
       footer={
         <Button
           className='brutal-font w-full border-2 border-black bg-orange-400 font-black text-black transition-all hover:bg-orange-500'
-          onClick={() => onMoveToWatchList(series.id)}
+          onClick={() => {
+            playClick();
+            onMoveToWatchList(series.id);
+          }}
         >
           <RotateCcw className='mr-2 h-4 w-4' /> ВЕРНУТЬ В ПЛАНЫ
         </Button>
@@ -59,6 +56,7 @@ export const WatchedCard = ({
       index={index}
       series={series}
       variant='watched'
+      onDelete={() => onDelete(series.id)}
     >
       <div className='flex flex-col gap-4'>
         <div className='flex flex-wrap gap-2'>
