@@ -1,8 +1,7 @@
 import { createClient } from '@/shared/api/supabase/server';
 import { SeriesHeader } from '@/shared/ui';
 import ClientTrackerWrapper from './_components/ClientTrackerWrapper';
-import { CreateFamilyForm } from './dashboard/_components/CreateFamilyForm';
-import { JoinFamilyForm } from './dashboard/_components/JoinFamilyForm';
+import { CreateFamilyForm, JoinFamilyForm } from './_components/Forms';
 
 export default async function HomePage() {
   const supabase = await createClient();

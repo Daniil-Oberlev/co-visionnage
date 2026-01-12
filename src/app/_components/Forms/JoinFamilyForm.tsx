@@ -1,10 +1,10 @@
 'use client';
 
-import type { FamilyActionState } from '../actions';
+import type { FamilyActionState } from '@/shared/actions/family';
 
 import { useActionState } from 'react';
 
-import { joinFamily } from '../actions';
+import { joinFamily } from '@/shared/actions/family';
 
 const initialState: FamilyActionState = {};
 

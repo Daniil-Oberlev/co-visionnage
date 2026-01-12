@@ -52,7 +52,7 @@ export async function createFamily(
 
   if (memberError) return { error: memberError.message };
 
-  revalidatePath('/dashboard');
+  revalidatePath('/');
   return { success: true };
 }
 
@@ -88,6 +88,6 @@ export async function joinFamily(
     return { error: joinError.message };
   }
 
-  revalidatePath('/dashboard');
+  revalidatePath('/');
   return { success: true };
 }
