@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react';
 import { ChangeEvent, useState } from 'react';
+import useSound from 'use-sound';
 
 import { Series } from '@/shared/types';
 import {
@@ -28,9 +29,10 @@ interface AddSeriesDialogProperties {
 export const AddSeriesDialog = ({ onAdd }: AddSeriesDialogProperties) => {
   const [isOpen, setIsOpen] = useState(false);
   const [genreInput, setGenreInput] = useState('');
+  const [playClick] = useSound('/sounds/click.mp3', { volume: 0.1 });
   const [newSeries, setNewSeries] = useState({
     comment: '',
-    image: '/placeholder.svg',
+    image: '',
     rating: 5,
     status: 'to-watch' as 'watched' | 'to-watch',
     title: '',
@@ -67,7 +69,7 @@ export const AddSeriesDialog = ({ onAdd }: AddSeriesDialogProperties) => {
 
       setNewSeries({
         comment: '',
-        image: '/placeholder.svg',
+        image: '',
         rating: 5,
         status: 'to-watch',
         title: '',
@@ -81,7 +83,10 @@ export const AddSeriesDialog = ({ onAdd }: AddSeriesDialogProperties) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className='brutal-font -rotate-2 transform border-4 border-black bg-pink-500 px-8 py-4 text-xl font-black text-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-transform hover:rotate-0 hover:bg-pink-600 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'>
+        <Button
+          className='brutal-font -rotate-2 transform border-4 border-black bg-pink-500 px-8 py-4 text-xl font-black text-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-transform hover:rotate-0 hover:bg-pink-600 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+          onClick={() => playClick()}
+        >
           <Plus className='mr-2 h-6 w-6' />
           ДОБАВИТЬ СЕРИАЛ!
         </Button>
