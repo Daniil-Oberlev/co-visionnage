@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/shared/api/supabase/server';
 import { Series, SeriesData, SeriesStatus } from '@/shared/types';
 
-export async function addSeries(familyId: string, data: SeriesData) {
+export async function addSeries(familyId: string, data: SeriesData | string) {
   const supabase = await createClient();
 
   const {
@@ -13,29 +13,47 @@ export async function addSeries(familyId: string, data: SeriesData) {
   } = await supabase.auth.getUser();
   if (!user) return { error: 'Не авторизован' };
 
+  const normalizedData: SeriesData =
+    typeof data === 'string'
+      ? {
+          title: data,
+          genres: [],
+          year: new Date().getFullYear(),
+          status: 'to-watch',
+        }
+      : data;
+
   console.warn('addSeries: input', {
     familyId,
     userId: user.id,
-    title: data?.title,
-    year: data?.year,
-    genresCount: Array.isArray(data?.genres) ? data.genres.length : undefined,
-    status: data?.status,
-    rating: data?.rating,
-    commentLength: typeof data?.comment === 'string' ? data.comment.length : 0,
+    inputType: typeof data,
+    title: normalizedData?.title,
+    year: normalizedData?.year,
+    genresCount: Array.isArray(normalizedData?.genres)
+      ? normalizedData.genres.length
+      : undefined,
+    status: normalizedData?.status,
+    rating: normalizedData?.rating,
+    commentLength:
+      typeof normalizedData?.comment === 'string'
+        ? normalizedData.comment.length
+        : 0,
     imageUrlLength:
-      typeof data?.image_url === 'string' ? data.image_url.length : 0,
+      typeof normalizedData?.image_url === 'string'
+        ? normalizedData.image_url.length
+        : 0,
     imageUrlPrefix:
-      typeof data?.image_url === 'string'
-        ? data.image_url.slice(0, 32)
+      typeof normalizedData?.image_url === 'string'
+        ? normalizedData.image_url.slice(0, 32)
         : undefined,
   });
 
   const seriesPayload = {
     family_id: familyId,
-    title: data.title,
-    year: data.year,
-    genres: data.genres,
-    image_url: data.image_url ?? undefined,
+    title: normalizedData.title,
+    year: normalizedData.year,
+    genres: normalizedData.genres,
+    image_url: normalizedData.image_url ?? undefined,
     created_by: user.id,
   };
 
@@ -53,9 +71,9 @@ export async function addSeries(familyId: string, data: SeriesData) {
   const statusPayload = {
     series_id: insertedSeries.id,
     user_id: user.id,
-    status: data.status,
-    rating: data.rating,
-    comment: data.comment,
+    status: normalizedData.status,
+    rating: normalizedData.rating,
+    comment: normalizedData.comment,
   };
 
   const { error: statusError } = await supabase
