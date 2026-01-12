@@ -1,6 +1,6 @@
 import { Github, Mail } from 'lucide-react';
-import useSound from 'use-sound';
 
+import { useAppSounds } from '@/shared/hooks/useAppSounds';
 import {
   Button,
   Dialog,
@@ -17,7 +17,7 @@ interface HeaderProperties {
 }
 
 export const SeriesHeader = ({ user, onLogin, onLogout }: HeaderProperties) => {
-  const [playClick] = useSound('/sounds/click.mp3', { volume: 0.1 });
+  const { playClick } = useAppSounds();
 
   return (
     <header className='mb-8 flex flex-col items-center justify-between gap-6 md:flex-row md:items-start'>
