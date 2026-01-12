@@ -1,4 +1,5 @@
 import { createClient } from '@/shared/api/supabase/server';
+import { SeriesStatus } from '@/shared/types';
 import { SeriesHeader } from '@/shared/ui';
 import ClientTrackerWrapper from './_components/ClientTrackerWrapper';
 import { CreateFamilyForm, JoinFamilyForm } from './_components/Forms';
@@ -58,10 +59,36 @@ export default async function HomePage() {
     .eq('family_id', familyData.id)
     .order('created_at', { ascending: false });
 
+  const seriesIds = (initialSeries ?? [])
+    .map((s) => s?.id)
+    .filter((id): id is string => typeof id === 'string');
+
+  const { data: seriesStatuses } = seriesIds.length > 0
+    ? await supabase
+        .from('family_series_status')
+        .select('series_id, status, rating, comment')
+        .eq('user_id', user.id)
+        .in('series_id', seriesIds)
+    : { data: [] };
+
+  const statusBySeriesId = new Map(
+    (seriesStatuses ?? []).map((row) => [row.series_id, row]),
+  );
+
+  const mergedSeries = (initialSeries ?? []).map((s) => {
+    const statusRow = statusBySeriesId.get(s.id);
+    return {
+      ...s,
+      status: (statusRow?.status as SeriesStatus | undefined) ?? 'to-watch',
+      rating: statusRow?.rating ?? undefined,
+      comment: statusRow?.comment ?? undefined,
+    };
+  });
+
   return (
     <ClientTrackerWrapper
       family={familyData}
-      initialSeries={initialSeries ?? []}
+      initialSeries={mergedSeries}
       userEmail={user.email}
     />
   );

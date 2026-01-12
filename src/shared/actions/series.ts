@@ -13,27 +13,41 @@ export async function addSeries(familyId: string, data: SeriesData) {
   } = await supabase.auth.getUser();
   if (!user) return { error: 'Не авторизован' };
 
-  const payload = {
+  const seriesPayload = {
     family_id: familyId,
     title: data.title,
-    status: data.status,
     year: data.year,
     genres: data.genres,
-    rating: data.rating,
-    comment: data.comment,
     image_url: data.image_url ?? undefined,
-    dateWatched:
-      data.status === 'watched'
-        ? new Date().toISOString().split('T')[0]
-        : undefined,
     created_by: user.id,
   };
 
-  const { error } = await supabase.from('family_series').insert(payload);
+  const { data: insertedSeries, error: insertError } = await supabase
+    .from('family_series')
+    .insert(seriesPayload)
+    .select('id')
+    .single();
 
-  if (error) {
-    console.error('Error adding series:', error);
-    return { error: error.message };
+  if (insertError) {
+    console.error('Error adding series:', insertError);
+    return { error: insertError.message };
+  }
+
+  const statusPayload = {
+    series_id: insertedSeries.id,
+    user_id: user.id,
+    status: data.status,
+    rating: data.rating,
+    comment: data.comment,
+  };
+
+  const { error: statusError } = await supabase
+    .from('family_series_status')
+    .upsert(statusPayload, { onConflict: 'series_id,user_id' });
+
+  if (statusError) {
+    console.error('Error adding series status:', statusError);
+    return { error: statusError.message };
   }
 
   revalidatePath('/');
@@ -63,10 +77,19 @@ export async function updateSeriesStatus(
 ) {
   const supabase = await createClient();
 
-  const { error } = await supabase
-    .from('family_series')
-    .update({ status })
-    .eq('id', seriesId);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: 'Не авторизован' };
+
+  const { error } = await supabase.from('family_series_status').upsert(
+    {
+      series_id: seriesId,
+      user_id: user.id,
+      status,
+    },
+    { onConflict: 'series_id,user_id' },
+  );
 
   if (error) {
     console.error('Error updating status:', error);
@@ -84,17 +107,22 @@ export async function markWatched(
 ) {
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: 'Не авторизован' };
+
   const payload = {
+    series_id: seriesId,
+    user_id: user.id,
     status: 'watched' as const,
     rating,
     comment,
-    dateWatched: new Date().toISOString().split('T')[0],
   };
 
   const { error } = await supabase
-    .from('family_series')
-    .update(payload)
-    .eq('id', seriesId);
+    .from('family_series_status')
+    .upsert(payload, { onConflict: 'series_id,user_id' });
 
   if (error) {
     console.error('Error marking watched:', error);
@@ -108,19 +136,24 @@ export async function markWatched(
 export async function moveToWatchList(seriesId: string) {
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: 'Не авторизован' };
+
   const databaseNull = undefined as unknown as null;
 
   const payload = {
+    series_id: seriesId,
+    user_id: user.id,
     status: 'to-watch' as const,
     rating: databaseNull,
     comment: databaseNull,
-    dateWatched: databaseNull,
   };
 
   const { error } = await supabase
-    .from('family_series')
-    .update(payload)
-    .eq('id', seriesId);
+    .from('family_series_status')
+    .upsert(payload, { onConflict: 'series_id,user_id' });
 
   if (error) {
     console.error('Error moving to watch list:', error);
