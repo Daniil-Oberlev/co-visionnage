@@ -53,23 +53,58 @@ export default async function HomePage() {
     );
   }
 
-  const { data: initialSeries } = await supabase
+  const { data: initialSeries, error: initialSeriesError } = await supabase
     .from('family_series')
     .select('*')
     .eq('family_id', familyData.id)
     .order('created_at', { ascending: false });
 
+  if (initialSeriesError) {
+    console.error('HomePage: error loading family_series', {
+      message: initialSeriesError.message,
+      code: (initialSeriesError as { code?: string }).code,
+      familyId: familyData.id,
+      userId: user.id,
+    });
+  }
+
   const seriesIds = (initialSeries ?? [])
     .map((s) => s?.id)
     .filter((id): id is string => typeof id === 'string');
 
-  const { data: seriesStatuses } = seriesIds.length > 0
-    ? await supabase
-        .from('family_series_status')
-        .select('series_id, status, rating, comment')
-        .eq('user_id', user.id)
-        .in('series_id', seriesIds)
-    : { data: [] };
+  let seriesStatuses: Array<{
+    series_id: string;
+    status?: unknown;
+    rating?: number | null;
+    comment?: string | null;
+  }> = [];
+  let seriesStatusesError: { message: string; code?: string } | undefined;
+
+  if (seriesIds.length > 0) {
+    const result = await supabase
+      .from('family_series_status')
+      .select('series_id, status, rating, comment')
+      .eq('user_id', user.id)
+      .in('series_id', seriesIds);
+
+    seriesStatuses = result.data ?? [];
+    seriesStatusesError = result.error
+      ? {
+          message: result.error.message,
+          code: (result.error as { code?: string }).code,
+        }
+      : undefined;
+  }
+
+  if (seriesStatusesError) {
+    console.error('HomePage: error loading family_series_status', {
+      message: seriesStatusesError.message,
+      code: seriesStatusesError.code,
+      familyId: familyData.id,
+      userId: user.id,
+      seriesIdsCount: seriesIds.length,
+    });
+  }
 
   const statusBySeriesId = new Map(
     (seriesStatuses ?? []).map((row) => [row.series_id, row]),

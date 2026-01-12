@@ -13,6 +13,23 @@ export async function addSeries(familyId: string, data: SeriesData) {
   } = await supabase.auth.getUser();
   if (!user) return { error: 'Не авторизован' };
 
+  console.warn('addSeries: input', {
+    familyId,
+    userId: user.id,
+    title: data?.title,
+    year: data?.year,
+    genresCount: Array.isArray(data?.genres) ? data.genres.length : undefined,
+    status: data?.status,
+    rating: data?.rating,
+    commentLength: typeof data?.comment === 'string' ? data.comment.length : 0,
+    imageUrlLength:
+      typeof data?.image_url === 'string' ? data.image_url.length : 0,
+    imageUrlPrefix:
+      typeof data?.image_url === 'string'
+        ? data.image_url.slice(0, 32)
+        : undefined,
+  });
+
   const seriesPayload = {
     family_id: familyId,
     title: data.title,
