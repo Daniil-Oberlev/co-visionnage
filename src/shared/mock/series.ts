@@ -10,7 +10,7 @@ export const MockSeries: Series[] = [
     comment: 'Невероятная атмосфера 80-х!',
     dateWatched: '2024-01-15',
     status: 'watched',
-    image: '/placeholder.svg?height=300&width=200',
+    image: '',
   },
   {
     id: 2,
@@ -21,7 +21,7 @@ export const MockSeries: Series[] = [
     comment: 'Очень напряженно смотрели',
     dateWatched: '2024-02-10',
     status: 'watched',
-    image: '/placeholder.svg?height=300&width=200',
+    image: '',
   },
   {
     id: 3,
@@ -29,7 +29,7 @@ export const MockSeries: Series[] = [
     genres: ['Фэнтези'],
     year: 2019,
     status: 'to-watch',
-    image: '/placeholder.svg?height=300&width=200',
+    image: '',
   },
   {
     id: 4,
@@ -37,6 +37,6 @@ export const MockSeries: Series[] = [
     genres: ['Драма'],
     year: 2016,
     status: 'to-watch',
-    image: '/placeholder.svg?height=300&width=200',
+    image: '',
   },
 ];
