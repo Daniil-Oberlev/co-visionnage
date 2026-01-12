@@ -17,7 +17,6 @@ export default defineConfig([
     '*.d.ts',
     'src/shared/lib/**',
     'src/utils/lib/**',
-    'src/shared/hooks/**',
   ]),
 
   {

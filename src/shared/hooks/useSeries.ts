@@ -1,64 +1,81 @@
 import { useCallback, useEffect, useState } from 'react';
+import confetti from 'canvas-confetti';
 
 import { MockSeries } from '@/shared/mock/series';
 import { Series, SeriesData } from '@/shared/types';
+import { useAppSounds } from './useAppSounds';
 
 export const useSeries = () => {
-  const [series, setSeries] = useState<Series[]>([]);
+  const { playSuccess, playDelete } = useAppSounds();
 
-  useEffect(() => {
+  const [series, setSeries] = useState<Series[]>(() => {
+    if (globalThis.window === undefined) return MockSeries;
     const saved = localStorage.getItem('series-data');
-    setSeries(saved ? JSON.parse(saved) : MockSeries);
-  }, []);
+    return saved ? JSON.parse(saved) : MockSeries;
+  });
 
   useEffect(() => {
-    if (series.length > 0) {
-      localStorage.setItem('series-data', JSON.stringify(series));
-    }
+    localStorage.setItem('series-data', JSON.stringify(series));
   }, [series]);
 
-  const addSeries = useCallback((newShow: Series) => {
-    setSeries((prev) => [...prev, newShow]);
-  }, []);
+  const addSeries = useCallback(
+    (newShow: Series) => {
+      setSeries((previous) => [...previous, newShow]);
+      playSuccess();
+    },
+    [playSuccess],
+  );
 
-  const deleteSeries = useCallback((id: number) => {
-    setSeries((prev) => prev.filter((s) => s.id !== id));
-  }, []);
+  const deleteSeries = useCallback(
+    (id: number) => {
+      setSeries((previous) => previous.filter((s) => s.id !== id));
+      playDelete();
+    },
+    [playDelete],
+  );
 
-  const editSeries = useCallback((id: number, data: Partial<SeriesData>) => {
-    setSeries((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
-  }, []);
+  const editSeries = useCallback(
+    (id: number, data: Partial<SeriesData>) => {
+      setSeries((previous) =>
+        previous.map((s) => (s.id === id ? { ...s, ...data } : s)),
+      );
+      playSuccess();
+    },
+    [playSuccess],
+  );
 
   const markAsWatched = useCallback(
     (id: number, rating: number, comment: string) => {
-      setSeries((prev) =>
-        prev.map((s) =>
+      setSeries((previous) =>
+        previous.map((s) =>
           s.id === id
             ? {
                 ...s,
                 comment,
-                dateWatched: new Date().toISOString().split('T')[0],
                 rating,
                 status: 'watched',
+                dateWatched: new Date().toISOString().split('T')[0],
               }
             : s,
         ),
       );
+
+      playSuccess();
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF'],
+      });
     },
-    [],
+    [playSuccess],
   );
 
   const moveToWatchList = useCallback((id: number) => {
-    setSeries((prev) =>
-      prev.map((s) =>
+    setSeries((previous) =>
+      previous.map((s) =>
         s.id === id
-          ? {
-              ...s,
-              comment: undefined,
-              dateWatched: undefined,
-              rating: undefined,
-              status: 'to-watch',
-            }
+          ? { ...s, comment: undefined, rating: undefined, status: 'to-watch' }
           : s,
       ),
     );

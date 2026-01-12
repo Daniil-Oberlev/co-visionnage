@@ -1,24 +1,30 @@
 'use client';
 
 import { Check, Clock } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { AddSeriesDialog } from '@/features/add-series';
 import { useAppSounds } from '@/shared/hooks/useAppSounds';
 import { useDebounce } from '@/shared/hooks/useDebounce';
-import { MockSeries } from '@/shared/mock/series';
-import { Series, SeriesData } from '@/shared/types';
+import { useSeries } from '@/shared/hooks/useSeries';
 import { EmptyState, SeriesFilters, SeriesHeader } from '@/shared/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/lib';
 import { ToWatchCard, WatchedCard } from '@/widgets';
 
 const SeriesTracker = () => {
-  const [series, setSeries] = useState<Series[]>(MockSeries);
+  const {
+    series,
+    addSeries,
+    deleteSeries,
+    editSeries,
+    markAsWatched,
+    moveToWatchList,
+  } = useSeries();
+
   const [user, setUser] = useState<
     { name: string; provider: string } | undefined
   >();
-
-  const { playClick, playSuccess } = useAppSounds();
+  const { playClick } = useAppSounds();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [genreFilter, setGenreFilter] = useState('all');
@@ -65,64 +71,6 @@ const SeriesTracker = () => {
     [filteredSeries],
   );
 
-  const handleAddSeries = useCallback(
-    (newShow: Series) => {
-      setSeries((previous) => [...previous, newShow]);
-      playSuccess();
-    },
-    [playSuccess],
-  );
-
-  const deleteSeries = useCallback((id: number) => {
-    setSeries((previous) => previous.filter((s) => s.id !== id));
-  }, []);
-
-  const editSeries = useCallback(
-    (id: number, data: Partial<SeriesData>) => {
-      setSeries((previous) =>
-        previous.map((s) => (s.id === id ? { ...s, ...data } : s)),
-      );
-      playSuccess();
-    },
-    [playSuccess],
-  );
-
-  const markAsWatched = useCallback(
-    (id: number, rating: number, comment: string) => {
-      setSeries((previous) =>
-        previous.map((s) =>
-          s.id === id
-            ? {
-                ...s,
-                comment,
-                dateWatched: new Date().toISOString().split('T')[0],
-                rating,
-                status: 'watched',
-              }
-            : s,
-        ),
-      );
-      playSuccess();
-    },
-    [playSuccess],
-  );
-
-  const moveToWatchList = useCallback((id: number) => {
-    setSeries((previous) =>
-      previous.map((s) =>
-        s.id === id
-          ? {
-              ...s,
-              comment: undefined,
-              dateWatched: undefined,
-              rating: undefined,
-              status: 'to-watch',
-            }
-          : s,
-      ),
-    );
-  }, []);
-
   return (
     <div className='brutal-font relative min-h-screen overflow-hidden bg-blue-500 font-sans'>
       <div
@@ -165,7 +113,7 @@ const SeriesTracker = () => {
         />
 
         <div className='mb-8 flex justify-center'>
-          <AddSeriesDialog onAdd={handleAddSeries} />
+          <AddSeriesDialog onAdd={addSeries} />
         </div>
 
         <Tabs
