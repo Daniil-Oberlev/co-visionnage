@@ -1,5 +1,5 @@
 export interface Series {
-  id: number;
+  id: string;
   title: string;
   genres: string[];
   year: number;
@@ -7,14 +7,15 @@ export interface Series {
   comment?: string;
   dateWatched?: string;
   status: SeriesStatus;
-  image: string;
+  image_url?: string | null;
 }
 
 export type SeriesData = {
   title: string;
   genres: string[];
   year: number;
-  image: string;
+  status: SeriesStatus;
+  image_url?: string | null;
   rating?: number;
   comment?: string;
 };

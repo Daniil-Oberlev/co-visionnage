@@ -9,7 +9,8 @@ import {
   addSeries as addSeriesAction,
   deleteSeries as deleteAction,
   editSeries as editAction,
-  updateSeriesStatus,
+  markWatched as markWatchedAction,
+  moveToWatchList as moveToWatchListAction,
 } from '@/shared/actions/series';
 import { createClient } from '@/shared/api/supabase/client';
 import { useAppSounds } from '@/shared/hooks/useAppSounds';
@@ -157,34 +158,34 @@ const SeriesTracker = ({
 
   const handleAddSeries = useCallback(
     async (data: SeriesData) => {
-      await runAndRefresh(() => addSeriesAction(family.id, data.title));
+      await runAndRefresh(() => addSeriesAction(family.id, data));
     },
     [family.id, runAndRefresh],
   );
 
   const handleDelete = useCallback(
-    async (id: number) => {
+    async (id: string) => {
       await runAndRefresh(() => deleteAction(id));
     },
     [runAndRefresh],
   );
 
   const handleMarkWatched = useCallback(
-    async (id: number) => {
-      await runAndRefresh(() => updateSeriesStatus(id, 'watched'));
+    async (id: string, rating: number, comment: string) => {
+      await runAndRefresh(() => markWatchedAction(id, rating, comment));
     },
     [runAndRefresh],
   );
 
   const handleMoveToWatch = useCallback(
-    async (id: number) => {
-      await runAndRefresh(() => updateSeriesStatus(id, 'to-watch'));
+    async (id: string) => {
+      await runAndRefresh(() => moveToWatchListAction(id));
     },
     [runAndRefresh],
   );
 
   const handleEdit = useCallback(
-    async (id: number, updates: Partial<Series>) => {
+    async (id: string, updates: Partial<SeriesData>) => {
       await runAndRefresh(() => editAction(id, updates));
     },
     [runAndRefresh],
@@ -270,9 +271,9 @@ const SeriesTracker = ({
                     key={show.id}
                     index={index}
                     series={show}
-                    onDelete={() => handleDelete(show.id)}
+                    onDelete={handleDelete}
                     onEdit={handleEdit}
-                    onMarkWatched={() => handleMarkWatched(show.id)}
+                    onMarkWatched={handleMarkWatched}
                   />
                 ))}
               </div>
@@ -295,9 +296,9 @@ const SeriesTracker = ({
                     key={show.id}
                     index={index}
                     series={show}
-                    onDelete={() => handleDelete(show.id)}
+                    onDelete={handleDelete}
                     onEdit={handleEdit}
-                    onMoveToWatchList={() => handleMoveToWatch(show.id)}
+                    onMoveToWatchList={handleMoveToWatch}
                   />
                 ))}
               </div>

@@ -2,7 +2,7 @@ import { Plus } from 'lucide-react';
 import { ChangeEvent, useState } from 'react';
 
 import { useAppSounds } from '@/shared/hooks/useAppSounds';
-import { Series, SeriesStatus } from '@/shared/types';
+import { SeriesData, SeriesStatus } from '@/shared/types';
 import {
   Button,
   Dialog,
@@ -23,7 +23,7 @@ import {
 } from '@/shared/ui/lib';
 
 interface AddSeriesDialogProperties {
-  onAdd: (series: Series) => void;
+  onAdd: (series: SeriesData) => void;
 }
 
 export const AddSeriesDialog = ({ onAdd }: AddSeriesDialogProperties) => {
@@ -32,7 +32,7 @@ export const AddSeriesDialog = ({ onAdd }: AddSeriesDialogProperties) => {
   const { playClick } = useAppSounds();
   const [newSeries, setNewSeries] = useState({
     comment: '',
-    image: '',
+    image_url: undefined as string | undefined,
     rating: 5,
     status: 'to-watch' as SeriesStatus,
     title: '',
@@ -46,7 +46,7 @@ export const AddSeriesDialog = ({ onAdd }: AddSeriesDialogProperties) => {
       reader.addEventListener('load', (event) => {
         setNewSeries((previous) => ({
           ...previous,
-          image: event.target?.result as string,
+          image_url: (event.target?.result as string) ?? undefined,
         }));
       });
       reader.readAsDataURL(file);
@@ -61,15 +61,18 @@ export const AddSeriesDialog = ({ onAdd }: AddSeriesDialogProperties) => {
         .filter((g) => g.length > 0);
 
       onAdd({
-        ...newSeries,
-        genres: genresArray,
-        id: Date.now(),
         title: newSeries.title.trim(),
-      } as Series);
+        genres: genresArray,
+        year: newSeries.year,
+        status: newSeries.status,
+        image_url: newSeries.image_url,
+        rating: newSeries.status === 'watched' ? newSeries.rating : undefined,
+        comment: newSeries.status === 'watched' ? newSeries.comment : undefined,
+      });
 
       setNewSeries({
         comment: '',
-        image: '',
+        image_url: undefined,
         rating: 5,
         status: 'to-watch',
         title: '',

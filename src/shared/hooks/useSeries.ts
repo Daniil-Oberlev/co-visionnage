@@ -48,7 +48,7 @@ export const useSeries = () => {
   );
 
   const deleteSeries = useCallback(
-    (id: number) => {
+    (id: string) => {
       setSeries((previous) => previous.filter((s) => s.id !== id));
       playDelete();
     },
@@ -56,7 +56,7 @@ export const useSeries = () => {
   );
 
   const editSeries = useCallback(
-    (id: number, data: Partial<SeriesData>) => {
+    (id: string, data: Partial<SeriesData>) => {
       setSeries((previous) =>
         previous.map((s) => (s.id === id ? { ...s, ...data } : s)),
       );
@@ -66,7 +66,7 @@ export const useSeries = () => {
   );
 
   const markAsWatched = useCallback(
-    (id: number, rating: number, comment: string) => {
+    (id: string, rating: number, comment: string) => {
       setSeries((previous) =>
         previous.map((s) =>
           s.id === id
@@ -92,7 +92,7 @@ export const useSeries = () => {
     [playSuccess],
   );
 
-  const moveToWatchList = useCallback((id: number) => {
+  const moveToWatchList = useCallback((id: string) => {
     setSeries((previous) =>
       previous.map((s) =>
         s.id === id

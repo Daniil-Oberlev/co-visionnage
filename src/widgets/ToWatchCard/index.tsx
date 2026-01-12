@@ -8,9 +8,9 @@ import { Badge, Button } from '@/shared/ui/lib';
 
 interface ToWatchCardProperties {
   index: number;
-  onDelete: (id: number) => void;
-  onEdit: (id: number, data: Partial<SeriesData>) => void;
-  onMarkWatched: (id: number, rating: number, comment: string) => void;
+  onDelete: (id: string) => void;
+  onEdit: (id: string, data: Partial<SeriesData>) => void;
+  onMarkWatched: (id: string, rating: number, comment: string) => void;
   series: Series;
 }
 

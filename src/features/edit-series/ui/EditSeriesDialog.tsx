@@ -22,7 +22,7 @@ import {
 
 interface EditSeriesProperties {
   includeRating?: boolean;
-  onSave: (id: number, data: Partial<SeriesData>) => void;
+  onSave: (id: string, data: Partial<SeriesData>) => void;
   series: Series;
   trigger: ReactNode;
 }
@@ -37,7 +37,7 @@ export const EditSeriesDialog = ({
   const [editData, setEditData] = useState<Partial<SeriesData>>({
     comment: series.comment ?? '',
     genres: series.genres,
-    image: series.image,
+    image_url: series.image_url ?? undefined,
     rating: series.rating ?? 5,
     title: series.title,
     year: series.year,
@@ -50,7 +50,7 @@ export const EditSeriesDialog = ({
       reader.addEventListener('load', (event) => {
         setEditData((previous) => ({
           ...previous,
-          image: event.target?.result as string,
+          image_url: (event.target?.result as string) ?? undefined,
         }));
       });
       reader.readAsDataURL(file);

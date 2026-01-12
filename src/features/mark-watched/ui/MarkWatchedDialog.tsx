@@ -21,7 +21,7 @@ import {
 } from '@/shared/ui/lib';
 
 interface MarkWatchedProperties {
-  onMark: (id: number, rating: number, comment: string) => void;
+  onMark: (id: string, rating: number, comment: string) => void;
   series: Series;
 }
 
