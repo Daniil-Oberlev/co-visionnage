@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
 
-import { MockSeries } from '@/shared/mock/series';
 import { Series, SeriesData } from '@/shared/types';
 import { useAppSounds } from './useAppSounds';
 
@@ -12,14 +11,14 @@ export const useSeries = () => {
   const { playSuccess, playDelete } = useAppSounds();
 
   const [series, setSeries] = useState<Series[]>(() => {
-    if (globalThis.window === undefined) return MockSeries;
+    if (globalThis.window === undefined) return [];
 
     try {
       const saved = localStorage.getItem('series-data');
-      return saved ? JSON.parse(saved) : MockSeries;
+      return saved ? JSON.parse(saved) : [];
     } catch (error) {
       console.error('Initial load error:', error);
-      return MockSeries;
+      return [];
     }
   });
 

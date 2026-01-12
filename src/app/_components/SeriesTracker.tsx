@@ -40,7 +40,7 @@ const SeriesTracker = ({
   initialSeries,
 }: SeriesTrackerProperties) => {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const { playClick } = useAppSounds();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -137,30 +137,57 @@ const SeriesTracker = ({
     [filteredSeries],
   );
 
-  const handleAddSeries = useCallback(
-    async (data: SeriesData) => {
-      await addSeriesAction(family.id, data.title);
+  const runAndRefresh = useCallback(
+    async <T,>(action: () => Promise<T>) => {
+      const result = await action();
+      if (
+        result &&
+        typeof result === 'object' &&
+        'error' in result &&
+        (result as { error?: unknown }).error
+      ) {
+        return result;
+      }
+
+      router.refresh();
+      return result;
     },
-    [family.id],
+    [router],
   );
 
-  const handleDelete = useCallback(async (id: number) => {
-    await deleteAction(id);
-  }, []);
+  const handleAddSeries = useCallback(
+    async (data: SeriesData) => {
+      await runAndRefresh(() => addSeriesAction(family.id, data.title));
+    },
+    [family.id, runAndRefresh],
+  );
 
-  const handleMarkWatched = useCallback(async (id: number) => {
-    await updateSeriesStatus(id, 'watched');
-  }, []);
+  const handleDelete = useCallback(
+    async (id: number) => {
+      await runAndRefresh(() => deleteAction(id));
+    },
+    [runAndRefresh],
+  );
 
-  const handleMoveToWatch = useCallback(async (id: number) => {
-    await updateSeriesStatus(id, 'to-watch');
-  }, []);
+  const handleMarkWatched = useCallback(
+    async (id: number) => {
+      await runAndRefresh(() => updateSeriesStatus(id, 'watched'));
+    },
+    [runAndRefresh],
+  );
+
+  const handleMoveToWatch = useCallback(
+    async (id: number) => {
+      await runAndRefresh(() => updateSeriesStatus(id, 'to-watch'));
+    },
+    [runAndRefresh],
+  );
 
   const handleEdit = useCallback(
     async (id: number, updates: Partial<Series>) => {
-      await editAction(id, updates);
+      await runAndRefresh(() => editAction(id, updates));
     },
-    [],
+    [runAndRefresh],
   );
 
   return (

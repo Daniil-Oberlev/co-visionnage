@@ -1,13 +1,5 @@
-'use client';
-
-import dynamic from 'next/dynamic';
-
 import { Series } from '@/shared/types';
-
-const SeriesTracker = dynamic(() => import('./SeriesTracker'), {
-  ssr: false,
-  loading: () => <div className='min-h-screen bg-blue-500' />,
-});
+import SeriesTracker from './SeriesTracker';
 
 interface Properties {
   userEmail?: string;
