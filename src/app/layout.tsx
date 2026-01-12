@@ -1,8 +1,12 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 
 import { Geist, Geist_Mono } from 'next/font/google';
 
-import './globals.css';
+import { Toaster } from '@/shared/ui/lib/Sonner';
+
+import '@/shared/styles/globals.css';
+import '@/shared/styles/cursor.css';
+import '@/shared/styles/scrollbar.css';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -26,6 +30,9 @@ export const metadata: Metadata = {
     description: 'Брутальный трекер для двоих',
     type: 'website',
   },
+};
+
+export const viewport: Viewport = {
   themeColor: '#3b82f6',
 };
 
@@ -35,12 +42,12 @@ const RootLayout = ({
   children: React.ReactNode;
 }>) => {
   return (
-    <html lang='ru'>
-      <link href='/manifest.json' rel='manifest' />
+    <html suppressHydrationWarning lang='ru'>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} brutal-font antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );

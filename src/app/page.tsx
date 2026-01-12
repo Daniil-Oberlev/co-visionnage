@@ -7,9 +7,13 @@ import { AddSeriesDialog } from '@/features/add-series';
 import { useAppSounds } from '@/shared/hooks/useAppSounds';
 import { useDebounce } from '@/shared/hooks/useDebounce';
 import { useSeries } from '@/shared/hooks/useSeries';
-import { EmptyState, SeriesFilters, SeriesHeader } from '@/shared/ui';
+import {
+  EmptyState,
+  SeriesCardSkeleton,
+  SeriesFilters,
+  SeriesHeader,
+} from '@/shared/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/lib';
-import { SeriesCardSkeleton } from '@/shared/ui/SeriesCardSkeleton';
 import { ToWatchCard, WatchedCard } from '@/widgets';
 
 const SeriesTracker = () => {
@@ -31,12 +35,17 @@ const SeriesTracker = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const animationFrame = requestAnimationFrame(() => {
       setIsMounted(true);
-      setIsLoading(false);
-    }, 800);
 
-    return () => clearTimeout(timer);
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 800);
+
+      return () => clearTimeout(timer);
+    });
+
+    return () => cancelAnimationFrame(animationFrame);
   }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -77,7 +86,9 @@ const SeriesTracker = () => {
             break;
           }
           case '3+': {
-            matchesRating = show.rating >= 3;
+            {
+              matchesRating = show.rating >= 3;
+            }
             break;
           }
         }
@@ -115,9 +126,9 @@ const SeriesTracker = () => {
   if (!isMounted) return <div className='min-h-screen bg-blue-500' />;
 
   return (
-    <div className='brutal-font relative min-h-screen overflow-hidden bg-blue-500 font-sans'>
+    <div className='brutal-font relative min-h-screen w-full overflow-x-hidden bg-blue-500 font-sans'>
       <div
-        className='absolute inset-0 z-0 opacity-70'
+        className='pointer-events-none fixed inset-0 z-0 opacity-60'
         style={{
           backgroundImage: "url('/images/clouds.png')",
           backgroundRepeat: 'no-repeat',
@@ -140,19 +151,10 @@ const SeriesTracker = () => {
           ratingFilter={ratingFilter}
           searchTerm={searchTerm}
           yearFilter={yearFilter}
-          onGenreChange={(v) => {
-            playClick();
-            setGenreFilter(v);
-          }}
-          onRatingChange={(v) => {
-            playClick();
-            setRatingFilter(v);
-          }}
+          onGenreChange={setGenreFilter}
+          onRatingChange={setRatingFilter}
           onSearchChange={setSearchTerm}
-          onYearChange={(v) => {
-            playClick();
-            setYearFilter(v);
-          }}
+          onYearChange={setYearFilter}
         />
 
         <div className='mb-8 flex justify-center'>
@@ -169,13 +171,15 @@ const SeriesTracker = () => {
               className='border-2 border-transparent p-4 font-black transition-all data-[state=active]:rotate-1 data-[state=active]:border-black data-[state=active]:bg-orange-500'
               value='to-watch'
             >
-              <Clock className='mr-2' /> ХОТИМ ({toWatchList.length})
+              <Clock className='mr-2' /> ХОТИМ (
+              {isLoading ? '...' : toWatchList.length})
             </TabsTrigger>
             <TabsTrigger
               className='border-2 border-transparent p-4 font-black transition-all data-[state=active]:-rotate-1 data-[state=active]:border-black data-[state=active]:bg-lime-500'
               value='watched'
             >
-              <Check className='mr-2' /> СМОТРЕЛИ ({watchedList.length})
+              <Check className='mr-2' /> СМОТРЕЛИ (
+              {isLoading ? '...' : watchedList.length})
             </TabsTrigger>
           </TabsList>
 

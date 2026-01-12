@@ -1,5 +1,8 @@
+'use client';
+
 import { useCallback, useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
 
 import { MockSeries } from '@/shared/mock/series';
 import { Series, SeriesData } from '@/shared/types';
@@ -11,12 +14,30 @@ export const useSeries = () => {
   const [series, setSeries] = useState<Series[]>(() => {
     if (globalThis.window === undefined) return MockSeries;
 
-    const saved = localStorage.getItem('series-data');
-    return saved ? JSON.parse(saved) : MockSeries;
+    try {
+      const saved = localStorage.getItem('series-data');
+      return saved ? JSON.parse(saved) : MockSeries;
+    } catch (error) {
+      console.error('Initial load error:', error);
+      return MockSeries;
+    }
   });
 
   useEffect(() => {
-    localStorage.setItem('series-data', JSON.stringify(series));
+    try {
+      localStorage.setItem('series-data', JSON.stringify(series));
+    } catch (error) {
+      if (
+        error instanceof DOMException &&
+        error.name === 'QuotaExceededError'
+      ) {
+        toast.error('ПАМЯТЬ ПЕРЕПОЛНЕНА!', {
+          description:
+            'Слишком много данных или тяжелые картинки. Очистите список.',
+          className: 'brutal-toast-error',
+        });
+      }
+    }
   }, [series]);
 
   const addSeries = useCallback(
