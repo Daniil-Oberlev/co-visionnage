@@ -61,7 +61,11 @@ export async function joinFamily(
   formData: FormData,
 ): Promise<FamilyActionState> {
   const supabase = await createClient();
-  const inviteCode = formData.get('inviteCode') as string;
+  const rawInviteCode = formData.get('inviteCode') as string;
+
+  if (!rawInviteCode) return { error: 'Введите код' };
+
+  const inviteCode = rawInviteCode.trim().toUpperCase();
 
   const {
     data: { user },
@@ -71,10 +75,11 @@ export async function joinFamily(
   const { data: family, error: findError } = await supabase
     .from('families')
     .select('id')
-    .eq('invite_code', inviteCode.trim().toUpperCase())
-    .single();
+    .eq('invite_code', inviteCode)
+    .maybeSingle();
 
-  if (findError || !family) return { error: 'Семья с таким кодом не найдена' };
+  if (findError) return { error: 'Ошибка при поиске: ' + findError.message };
+  if (!family) return { error: `Семья с кодом ${inviteCode} не найдена` };
 
   const { error: joinError } = await supabase.from('family_members').insert({
     family_id: family.id,
@@ -83,8 +88,9 @@ export async function joinFamily(
   });
 
   if (joinError) {
-    if (joinError.code === '23505')
+    if (joinError.code === '23505') {
       return { error: 'Вы уже состоите в этой семье' };
+    }
     return { error: joinError.message };
   }
 
